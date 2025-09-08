@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Archery Score Sheet</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .score-btn { min-width: 40px; }
+  </style>
+</head>
+<body class="bg-gray-100 p-6">
+  <div class="max-w-3xl mx-auto bg-white shadow-xl rounded-2xl p-6">
+    <h1 class="text-2xl font-bold mb-4">Archery Score Sheet</h1>
+
+    <!-- Score buttons -->
+    <div class="flex flex-wrap gap-2 mb-6">
+      <button class="score-btn bg-yellow-400 rounded-lg px-3 py-2" onclick="addScore(10)">X</button>
+      <button class="score-btn bg-yellow-400 rounded-lg px-3 py-2" onclick="addScore(10)">10</button>
+      <button class="score-btn bg-yellow-300 rounded-lg px-3 py-2" onclick="addScore(9)">9</button>
+      <button class="score-btn bg-red-400 rounded-lg px-3 py-2" onclick="addScore(8)">8</button>
+      <button class="score-btn bg-red-300 rounded-lg px-3 py-2" onclick="addScore(7)">7</button>
+      <button class="score-btn bg-blue-400 rounded-lg px-3 py-2" onclick="addScore(6)">6</button>
+      <button class="score-btn bg-blue-300 rounded-lg px-3 py-2" onclick="addScore(5)">5</button>
+      <button class="score-btn bg-black text-white rounded-lg px-3 py-2" onclick="addScore(4)">4</button>
+      <button class="score-btn bg-black text-white rounded-lg px-3 py-2" onclick="addScore(3)">3</button>
+      <button class="score-btn bg-white border rounded-lg px-3 py-2" onclick="addScore(2)">2</button>
+      <button class="score-btn bg-white border rounded-lg px-3 py-2" onclick="addScore(1)">1</button>
+      <button class="score-btn bg-gray-300 rounded-lg px-3 py-2" onclick="addScore(0)">M</button>
+    </div>
+
+    <!-- Arrow table -->
+    <table class="w-full table-auto border-collapse mb-4">
+      <thead>
+        <tr class="bg-gray-200">
+          <th class="border p-2">End</th>
+          <th class="border p-2">Arrow</th>
+          <th class="border p-2">Score</th>
+        </tr>
+      </thead>
+      <tbody id="scoreTable"></tbody>
+    </table>
+
+    <!-- Totals -->
+    <div class="flex justify-between items-center bg-gray-100 p-4 rounded-xl">
+      <div class="text-lg">Total Score: <span id="totalScore">0</span></div>
+      <div class="text-lg">Arrows Shot: <span id="arrowCount">0</span></div>
+    </div>
+
+    <!-- Arrow analysis -->
+    <div class="mt-6">
+      <h2 class="text-xl font-semibold mb-2">Arrow Analysis</h2>
+      <ul id="arrowAnalysis" class="list-disc list-inside text-gray-700"></ul>
+    </div>
+
+    <div class="mt-6 flex gap-2">
+      <button onclick="resetScores()" class="bg-red-500 text-white px-4 py-2 rounded-xl">Reset</button>
+    </div>
+  </div>
+
+  <script>
+    let scores = [];
+    let arrowsPerEnd = 6;
+
+    function addScore(value) {
+      scores.push(value);
+      updateTable();
+    }
+
+    function updateTable() {
+      const tbody = document.getElementById("scoreTable");
+      tbody.innerHTML = "";
+
+      scores.forEach((score, i) => {
+        const end = Math.floor(i / arrowsPerEnd) + 1;
+        const arrow = (i % arrowsPerEnd) + 1;
+        tbody.innerHTML += `
+          <tr>
+            <td class='border p-2 text-center'>${end}</td>
+            <td class='border p-2 text-center'>${arrow}</td>
+            <td class='border p-2 text-center'>${score}</td>
+          </tr>`;
+      });
+
+      document.getElementById("totalScore").innerText = scores.reduce((a, b) => a + b, 0);
+      document.getElementById("arrowCount").innerText = scores.length;
+
+      updateAnalysis();
+    }
+
+    function updateAnalysis() {
+      const analysis = document.getElementById("arrowAnalysis");
+      analysis.innerHTML = "";
+
+      if (scores.length === 0) return;
+
+      // Track per-arrow position (arrow 1, arrow 2, etc.)
+      let arrowMap = {};
+      scores.forEach((score, i) => {
+        const arrow = (i % arrowsPerEnd) + 1;
+        if (!arrowMap[arrow]) arrowMap[arrow] = [];
+        arrowMap[arrow].push(score);
+      });
+
+      for (let arrow in arrowMap) {
+        const arr = arrowMap[arrow];
+        const avg = (arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2);
+        let msg = `Arrow ${arrow}: avg ${avg}, scores [${arr.join(", ")}]`;
+        analysis.innerHTML += `<li>${msg}</li>`;
+      }
+    }
+
+    function resetScores() {
+      scores = [];
+      updateTable();
+    }
+  </script>
+</body>
+</html>
